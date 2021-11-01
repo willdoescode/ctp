@@ -7,6 +7,8 @@ license = "MIT"
 authors = ["William Lane <williamlane923@gmail.com>"]
 
 [dependencies]
-clap = "2.33.3"
+anyhow = "1.0.44"
+clap = "3.0.0-beta.5"
 serde = "1.0.130"
+thiserror = "1.0.30"
 toml = "0.5.8"

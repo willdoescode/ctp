@@ -4,8 +4,8 @@ go = "~/..."
 haskell = "~/..."
 
 [commands-before]
-rust = "cargo version"
+rust = ["cargo version"]
 
 [commands-after]
-rust = "cargo check"
-haskell = "ghc Main.hs"
+rust = ["cargo check"]
+haskell = ["ghc Main.hs"]
