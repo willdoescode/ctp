@@ -45,7 +45,7 @@ impl Opts {
         Path::new(path).exists()
     }
 
-    pub fn opts() -> Result<Self, OptError> {
+    pub fn opts() -> Result<Self, anyhow::Error> {
         let mut opts: Opts = Opts::parse();
         if &opts.output == DEFAULT_PROJECT_LOCATION {
             opts.output = opts.project_name.to_owned();
@@ -55,15 +55,17 @@ impl Opts {
         let project_name_invalid = Self::valid_name(&opts.project_name);
 
         if !Self::config_file_exists(&opts.config) {
-            return Err(OptError::NoConfigFile);
+            return Err(anyhow!(OptError::NoConfigFile.to_string()));
         }
 
         if output_invalid {
-            return Err(OptError::OutputError(opts.output));
+            return Err(anyhow!(OptError::OutputError(opts.output).to_string()));
         }
 
         if project_name_invalid && output_invalid {
-            return Err(OptError::ProjectNameError(opts.project_name));
+            return Err(anyhow!(
+                OptError::ProjectNameError(opts.project_name).to_string()
+            ));
         }
 
         Ok(opts)

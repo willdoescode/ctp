@@ -1,6 +1,9 @@
-mod opts;
-use opts::Opts;
+#[macro_use]
+extern crate anyhow;
 
+mod opts;
+use anyhow::Result;
+use opts::Opts;
 use std::error::Error;
 
 fn main() -> Result<(), Box<dyn Error>> {
