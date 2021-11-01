@@ -1,0 +1,12 @@
+[package]
+name = "ctp"
+version = "0.1.0"
+edition = "2021"
+description = "Create The Project"
+license = "MIT"
+authors = ["William Lane <williamlane923@gmail.com>"]
+
+[dependencies]
+clap = "2.33.3"
+serde = "1.0.130"
+toml = "0.5.8"

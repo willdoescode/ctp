@@ -1,0 +1,11 @@
+[templates]
+rust = "~/..."
+go = "~/..."
+haskell = "~/..."
+
+[commands-before]
+rust = "cargo version"
+
+[commands-after]
+rust = "cargo check"
+haskell = "ghc Main.hs"
