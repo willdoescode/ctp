@@ -3,5 +3,5 @@
 ### Install
 
 ```console
-cargo install ctp
+$ cargo install ctp
 ```
