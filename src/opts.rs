@@ -4,8 +4,8 @@ use anyhow::Result;
 use clap::Parser;
 use thiserror::Error;
 
-const VERSION: &'static str = env!("CARGO_PKG_VERSION");
-pub const DEFAULT_PROJECT_LOCATION: &'static str = "_";
+const VERSION: &str = env!("CARGO_PKG_VERSION");
+pub const DEFAULT_PROJECT_LOCATION: &str = "_";
 
 #[derive(Error, Debug)]
 pub enum OptError {
@@ -50,10 +50,11 @@ impl Opts {
         Path::new(path).exists()
     }
 
-    pub fn opts() -> Result<Self, anyhow::Error> {
+    #[allow(clippy::self_named_constructors)]
+    pub fn opts() -> Result<Self, OptError> {
         let mut opts: Opts = Opts::parse();
 
-        if &opts.output == DEFAULT_PROJECT_LOCATION {
+        if opts.output == DEFAULT_PROJECT_LOCATION {
             opts.output = opts.project_name.to_owned();
         }
 
@@ -61,17 +62,15 @@ impl Opts {
         let project_name_invalid = Self::valid_name(&opts.project_name);
 
         if !Self::config_file_exists(&opts.config) {
-            return Err(anyhow!(OptError::NoConfigFile.to_string()));
+            return Err(OptError::NoConfigFile);
         }
 
         if output_invalid {
-            return Err(anyhow!(OptError::OutputError(opts.output).to_string()));
+            return Err(OptError::OutputError(opts.output));
         }
 
         if project_name_invalid && output_invalid {
-            return Err(anyhow!(
-                OptError::ProjectNameError(opts.project_name).to_string()
-            ));
+            return Err(OptError::ProjectNameError(opts.project_name));
         }
 
         Ok(opts)

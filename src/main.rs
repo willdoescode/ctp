@@ -1,12 +1,14 @@
-#[macro_use]
-extern crate anyhow;
+#![allow(dead_code)]
 
 mod opts;
+mod shape;
 use anyhow::Result;
 use opts::Opts;
-use std::error::Error;
 
-fn main() -> Result<(), Box<dyn Error>> {
+#[cfg(test)]
+pub mod tests;
+
+fn main() -> Result<(), anyhow::Error> {
     let opts = Opts::opts()?;
     println!("{}", opts.project_name);
 
