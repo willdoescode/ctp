@@ -1,3 +1,4 @@
+use crate::commands::exec;
 use crate::shape::{get_lang_location, TomlError};
 
 #[test]
@@ -51,5 +52,14 @@ fn test_invalid_type() {
             e.to_string(),
             "The value of \"rust\" is an invalid type, expected String".to_string()
         )
+    }
+}
+
+#[test]
+fn test_command() {
+    let exec_output = exec("", "");
+    match exec_output {
+        Ok(_) => panic!("Expected error."),
+        Err(e) => assert_eq!(e.to_string(), "Cannot execute empty command."),
     }
 }

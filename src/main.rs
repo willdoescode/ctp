@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 
+mod commands;
 mod opts;
 mod shape;
 use anyhow::Result;
