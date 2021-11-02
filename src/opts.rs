@@ -1,10 +1,11 @@
+use std::path::Path;
+
 use anyhow::Result;
 use clap::Parser;
-use std::path::Path;
 use thiserror::Error;
 
 const VERSION: &'static str = env!("CARGO_PKG_VERSION");
-pub const DEFAULT_PROJECT_LOCATION: &'static str = "_-_-";
+pub const DEFAULT_PROJECT_LOCATION: &'static str = "_";
 
 #[derive(Error, Debug)]
 pub enum OptError {
@@ -22,23 +23,27 @@ pub enum OptError {
 #[clap(version = VERSION, author = "William Lane <williamlane923@gmail.com>")]
 pub struct Opts {
     #[clap(short, long, default_value = "~/.ctp")]
+    /// Optional custom config file location.
     pub config: String,
 
+    /// Project language name.
     pub language: String,
+    /// Project name.
     pub project_name: String,
 
     #[clap(short, long, default_value = DEFAULT_PROJECT_LOCATION)]
+    /// Optional custom output directory location.
     pub output: String,
 }
 
 impl Opts {
     pub fn valid_name(s: &str) -> bool {
-        let invalid_name_chars = [
+        [
             '#', '\\', '%', '&', '{', '}', '<', '>', '*', '?', '/', '$', '!', '\'', '"', ':', '+',
             '`', '|', '=',
-        ];
-
-        invalid_name_chars.iter().any(|x| s.contains(*x))
+        ]
+        .iter()
+        .any(|c| s.contains(*c))
     }
 
     pub fn config_file_exists(path: &str) -> bool {
@@ -47,6 +52,7 @@ impl Opts {
 
     pub fn opts() -> Result<Self, anyhow::Error> {
         let mut opts: Opts = Opts::parse();
+
         if &opts.output == DEFAULT_PROJECT_LOCATION {
             opts.output = opts.project_name.to_owned();
         }
