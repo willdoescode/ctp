@@ -73,7 +73,7 @@ fn test_invalid_type() {
 
 #[test]
 fn test_command() {
-    let exec_output = exec("", "");
+    let exec_output = exec("", "", "");
     match exec_output {
         Ok(_) => panic!("Expected error."),
         Err(e) => assert_eq!(e.to_string(), "Cannot execute empty command."),

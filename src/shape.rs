@@ -56,34 +56,37 @@ where
         return Err(TomlError::LanguageNotFound(lang_name.into()));
     }
 
-    let language = match table[lang_name].to_owned().try_into::<T>() {
-        Ok(s) => s,
-        Err(_) => return Err(TomlError::InvalidType(lang_name.into())),
-    };
-
-    Ok(language)
+    match table[lang_name].to_owned().try_into::<T>() {
+        Ok(s) => Ok(s),
+        Err(_) => Err(TomlError::InvalidType(lang_name.into())),
+    }
 }
 
-pub fn get_before_commands(
-    toml_value: &toml::Value,
-    lang_name: &str,
-) -> Result<Vec<String>, TomlError> {
-    base_toml_checks(toml_value)?;
-    let commands_before = get_table(toml_value, "commands-before")?;
-    let before_commands = extract_language_value(&commands_before, lang_name)?;
-
-    Ok(before_commands)
+pub enum CommandVariants {
+    Before,
+    After,
 }
 
-pub fn get_after_commands(
+impl ToString for CommandVariants {
+    fn to_string(&self) -> String {
+        match self {
+            Self::Before => "commands-before",
+            Self::After => "commands-after",
+        }
+        .into()
+    }
+}
+
+pub fn get_commands(
     toml_value: &toml::Value,
     lang_name: &str,
+    variant: CommandVariants,
 ) -> Result<Vec<String>, TomlError> {
     base_toml_checks(toml_value)?;
-    let commands_after = get_table(toml_value, "commands-after")?;
-    let after_commands = extract_language_value(&commands_after, lang_name)?;
+    let commands = get_table(toml_value, &variant.to_string())?;
+    let commands = extract_language_value(&commands, lang_name)?;
 
-    Ok(after_commands)
+    Ok(commands)
 }
 
 pub fn get_lang_location(toml_value: &toml::Value, lang_name: &str) -> Result<String, TomlError> {
