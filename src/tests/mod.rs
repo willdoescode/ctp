@@ -6,6 +6,10 @@ fn test_get_lang_location() {
     let missing_lang = r#"
     [templates]
 
+    [commands-before]
+
+    [commands-after]
+
   "#;
 
     let missing_lang_toml_value: toml::Value = toml::from_str(missing_lang).unwrap();
@@ -17,6 +21,7 @@ fn test_get_lang_location() {
             "The language \"rust\" could not be found in your config.".to_string()
         )
     } else {
+        println!("{}", missing_lang_location.unwrap());
         panic!("Location given");
     }
 }
@@ -26,15 +31,23 @@ fn test_missing_templates() {
     let missing_lang = r#"
     [template]
 
+    [commands-before]
+
+    [commands-after]
+
   "#;
 
     let missing_templates: toml::Value = toml::from_str(missing_lang).unwrap();
     let missing_templates_output = get_lang_location(&missing_templates, "rust");
 
-    assert!(matches!(
-        missing_templates_output,
-        Err(TomlError::TemplatesNotFound)
-    ));
+    match missing_templates_output {
+        Err(e) => assert_eq!(
+            e.to_string(),
+            "\"templates\" section could not be found in your config. Add it with [templates]"
+                .to_string()
+        ),
+        Ok(_) => unreachable!(),
+    }
 }
 
 #[test]
@@ -42,6 +55,9 @@ fn test_invalid_type() {
     let missing_lang = r#"
     [templates]
     rust = 5
+
+    [commands-before]
+    [commands-after]
   "#;
 
     let invalid_type: toml::Value = toml::from_str(missing_lang).unwrap();

@@ -1,7 +1,9 @@
-use anyhow::anyhow;
-use anyhow::Result;
 use std::process::Command;
+
+use anyhow::{anyhow, Result};
 use thiserror::Error;
+
+const REPLACEABLE_STR: &str = "{{__NAME__}}";
 
 #[derive(Error, Debug)]
 pub enum ExecError {
@@ -10,7 +12,7 @@ pub enum ExecError {
 }
 
 pub fn exec(s: &str, proj_name: &str) -> Result<(), anyhow::Error> {
-    let replaced = s.replace("{{__NAME__}}", proj_name);
+    let replaced = s.replace(REPLACEABLE_STR, proj_name);
     let split = replaced.split_ascii_whitespace().collect::<Vec<&str>>();
 
     match split.as_slice() {

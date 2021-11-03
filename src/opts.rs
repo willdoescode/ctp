@@ -60,6 +60,7 @@ impl Opts {
 
         let output_invalid = Self::valid_name(&opts.output);
         let project_name_invalid = Self::valid_name(&opts.project_name);
+        opts.output = format!("./{}", opts.output);
 
         if !Self::config_file_exists(&opts.config) {
             return Err(OptError::NoConfigFile);
