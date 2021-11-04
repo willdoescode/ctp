@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::path::PathBuf;
 
 use anyhow::Result;
 use clap::Parser;
@@ -22,9 +22,9 @@ pub enum OptError {
 #[derive(Parser)]
 #[clap(version = VERSION, author = "William Lane <williamlane923@gmail.com>")]
 pub struct Opts {
-    #[clap(short, long, default_value = "~/.ctp")]
+    #[clap(short, long, default_value = "_default_")]
     /// Optional custom config file location.
-    pub config: String,
+    pub config: PathBuf,
 
     /// Project language name.
     pub language: String,
@@ -33,7 +33,7 @@ pub struct Opts {
 
     #[clap(short, long, default_value = DEFAULT_PROJECT_LOCATION)]
     /// Optional custom output directory location.
-    pub output: String,
+    pub output: PathBuf,
 }
 
 impl Opts {
@@ -46,31 +46,25 @@ impl Opts {
         .any(|c| s.contains(*c))
     }
 
-    pub fn config_file_exists(path: &str) -> bool {
-        Path::new(path).exists()
-    }
-
     #[allow(clippy::self_named_constructors)]
     pub fn opts() -> Result<Self, OptError> {
         let mut opts: Opts = Opts::parse();
 
-        if opts.output == DEFAULT_PROJECT_LOCATION {
-            opts.output = opts.project_name.to_owned();
+        if opts.config.as_path().to_str().unwrap() == "_default_" {
+            opts.config = PathBuf::from(std::env::var("HOME").unwrap()).join(".ctp.toml");
         }
 
-        let output_invalid = Self::valid_name(&opts.output);
-        let project_name_invalid = Self::valid_name(&opts.project_name);
-        opts.output = format!("./{}", opts.output);
+        if opts.output.as_path().to_str().unwrap() == DEFAULT_PROJECT_LOCATION {
+            opts.output = ["./", &opts.project_name].iter().collect();
+        }
 
-        if !Self::config_file_exists(&opts.config) {
+        println!("{}", opts.config.canonicalize().unwrap().to_str().unwrap());
+        if !opts.config.exists() {
+            println!("{}", opts.config.as_path().to_str().unwrap());
             return Err(OptError::NoConfigFile);
         }
 
-        if output_invalid {
-            return Err(OptError::OutputError(opts.output));
-        }
-
-        if project_name_invalid && output_invalid {
+        if Self::valid_name(&opts.project_name) {
             return Err(OptError::ProjectNameError(opts.project_name));
         }
 

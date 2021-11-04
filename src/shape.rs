@@ -22,14 +22,6 @@ fn base_toml_checks(toml_value: &toml::Value) -> Result<(), TomlError> {
         return Err(TomlError::SectionNotFound("templates".into()));
     }
 
-    if !toml_table_unwraped.contains_key("commands-before") {
-        return Err(TomlError::SectionNotFound("commands-before".into()));
-    }
-
-    if !toml_table_unwraped.contains_key("commands-after") {
-        return Err(TomlError::SectionNotFound("commands-after".into()));
-    }
-
     Ok(())
 }
 
@@ -57,7 +49,7 @@ where
     }
 
     match table[lang_name].to_owned().try_into::<T>() {
-        Ok(s) => Ok(s),
+        Ok(val) => Ok(val),
         Err(_) => Err(TomlError::InvalidType(lang_name.into())),
     }
 }
@@ -81,12 +73,21 @@ pub fn get_commands(
     toml_value: &toml::Value,
     lang_name: &str,
     variant: CommandVariants,
-) -> Result<Vec<String>, TomlError> {
+) -> Result<Option<Vec<String>>, TomlError> {
     base_toml_checks(toml_value)?;
-    let commands = get_table(toml_value, &variant.to_string())?;
-    let commands = extract_language_value(&commands, lang_name)?;
+    if !toml_value
+        .as_table()
+        .unwrap()
+        .contains_key(&variant.to_string())
+    {
+        return Ok(None);
+    }
 
-    Ok(commands)
+    let commands = get_table(toml_value, &variant.to_string())?;
+    match extract_language_value(&commands, lang_name) {
+        Ok(commands) => Ok(Some(commands)),
+        Err(_) => Ok(None),
+    }
 }
 
 pub fn get_lang_location(toml_value: &toml::Value, lang_name: &str) -> Result<String, TomlError> {

@@ -2,10 +2,13 @@
 rust = "~/..."
 go = "~/..."
 haskell = "~/..."
+c = "./proj-example"
 
 [commands-before]
 rust = ["echo \"creating: {{__NAME__}}\"", "cargo version"]
+c = ["echo \"hello\""]
 
 [commands-after]
 rust = ["cargo check"]
 haskell = ["ghc Main.hs"]
+c = ["gcc -o {{__NAME__}} main.c", "./{{__NAME__}}"]
