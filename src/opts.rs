@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::path::PathBuf;
 
 use anyhow::Result;
 use clap::Parser;
@@ -11,20 +11,14 @@ pub const DEFAULT_PROJECT_LOCATION: &str = "_";
 pub enum OptError {
     #[error("No config file found. Please create one at $HOME/.ctp or pass in a config file location with --config.")]
     NoConfigFile,
-
-    #[error("{0} is not a valid output directory name, please use --output for a valid directory name or use a differnet project name.")]
-    ProjectNameError(String),
-
-    #[error("\"{0}\" is not a valid output directory name, please enter a new output directory.")]
-    OutputError(String),
 }
 
 #[derive(Parser)]
 #[clap(version = VERSION, author = "William Lane <williamlane923@gmail.com>")]
 pub struct Opts {
-    #[clap(short, long, default_value = "~/.ctp")]
+    #[clap(short, long, default_value = "_default_")]
     /// Optional custom config file location.
-    pub config: String,
+    pub config: PathBuf,
 
     /// Project language name.
     pub language: String,
@@ -33,45 +27,24 @@ pub struct Opts {
 
     #[clap(short, long, default_value = DEFAULT_PROJECT_LOCATION)]
     /// Optional custom output directory location.
-    pub output: String,
+    pub output: PathBuf,
 }
 
 impl Opts {
-    pub fn valid_name(s: &str) -> bool {
-        [
-            '#', '\\', '%', '&', '{', '}', '<', '>', '*', '?', '/', '$', '!', '\'', '"', ':', '+',
-            '`', '|', '=',
-        ]
-        .iter()
-        .any(|c| s.contains(*c))
-    }
-
-    pub fn config_file_exists(path: &str) -> bool {
-        Path::new(path).exists()
-    }
-
     #[allow(clippy::self_named_constructors)]
     pub fn opts() -> Result<Self, OptError> {
         let mut opts: Opts = Opts::parse();
 
-        if opts.output == DEFAULT_PROJECT_LOCATION {
-            opts.output = opts.project_name.to_owned();
+        if opts.config.as_path().to_str().unwrap() == "_default_" {
+            opts.config = PathBuf::from(std::env::var("HOME").unwrap()).join(".ctp.toml");
         }
 
-        let output_invalid = Self::valid_name(&opts.output);
-        let project_name_invalid = Self::valid_name(&opts.project_name);
-        opts.output = format!("./{}", opts.output);
+        if opts.output.as_path().to_str().unwrap() == DEFAULT_PROJECT_LOCATION {
+            opts.output = ["./", &opts.project_name].iter().collect();
+        }
 
-        if !Self::config_file_exists(&opts.config) {
+        if !opts.config.exists() {
             return Err(OptError::NoConfigFile);
-        }
-
-        if output_invalid {
-            return Err(OptError::OutputError(opts.output));
-        }
-
-        if project_name_invalid && output_invalid {
-            return Err(OptError::ProjectNameError(opts.project_name));
         }
 
         Ok(opts)
