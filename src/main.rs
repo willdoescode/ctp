@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 mod commands;
 mod directory;
 mod opts;
@@ -24,16 +22,13 @@ fn main() -> Result<(), anyhow::Error> {
 
     let toml_config = toml::from_str(&config_file)?;
     let dir_location = shape::get_lang_location(&toml_config, &opts.language)?;
+    let output_path = &opts.output.as_path().to_str().unwrap();
 
     if let Some(commands) =
         shape::get_commands(&toml_config, &opts.language, shape::CommandVariants::Before)?
     {
         for command in commands {
-            commands::exec(
-                &command,
-                &opts.project_name,
-                &opts.output.as_path().to_str().unwrap(),
-            )?;
+            commands::exec(&command, &opts.project_name, &output_path)?;
         }
     }
 
@@ -41,7 +36,7 @@ fn main() -> Result<(), anyhow::Error> {
         &dir_location,
         &opts.output,
         &opts.project_name,
-        &opts.output.as_path().to_str().unwrap(),
+        &output_path,
     )?;
 
     std::env::set_current_dir(&opts.output)?;
@@ -50,11 +45,7 @@ fn main() -> Result<(), anyhow::Error> {
         shape::get_commands(&toml_config, &opts.language, shape::CommandVariants::After)?
     {
         for command in commands {
-            commands::exec(
-                &command,
-                &opts.project_name,
-                &opts.output.as_path().to_str().unwrap(),
-            )?;
+            commands::exec(&command, &opts.project_name, &output_path)?;
         }
     }
 

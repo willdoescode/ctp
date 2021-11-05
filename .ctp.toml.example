@@ -1,0 +1,11 @@
+# Location of template (use absolute path)
+[templates]
+c = "/Users/willlane/dev/ctp/proj-example/"
+
+# Commands that will be run before project dir
+[commands-before]
+c = ["echo {{__OUT__}}"]
+
+# Commands that will be run in project dir
+[commands-after]
+c = ["gcc main.c -o {{__NAME__}}", "./{{__NAME__}}"]

@@ -11,12 +11,6 @@ pub const DEFAULT_PROJECT_LOCATION: &str = "_";
 pub enum OptError {
     #[error("No config file found. Please create one at $HOME/.ctp or pass in a config file location with --config.")]
     NoConfigFile,
-
-    #[error("{0} is not a valid output directory name, please use --output for a valid directory name or use a differnet project name.")]
-    ProjectNameError(String),
-
-    #[error("\"{0}\" is not a valid output directory name, please enter a new output directory.")]
-    OutputError(String),
 }
 
 #[derive(Parser)]
@@ -37,15 +31,6 @@ pub struct Opts {
 }
 
 impl Opts {
-    pub fn valid_name(s: &str) -> bool {
-        [
-            '#', '\\', '%', '&', '{', '}', '<', '>', '*', '?', '/', '$', '!', '\'', '"', ':', '+',
-            '`', '|', '=',
-        ]
-        .iter()
-        .any(|c| s.contains(*c))
-    }
-
     #[allow(clippy::self_named_constructors)]
     pub fn opts() -> Result<Self, OptError> {
         let mut opts: Opts = Opts::parse();
@@ -58,14 +43,8 @@ impl Opts {
             opts.output = ["./", &opts.project_name].iter().collect();
         }
 
-        println!("{}", opts.config.canonicalize().unwrap().to_str().unwrap());
         if !opts.config.exists() {
-            println!("{}", opts.config.as_path().to_str().unwrap());
             return Err(OptError::NoConfigFile);
-        }
-
-        if Self::valid_name(&opts.project_name) {
-            return Err(OptError::ProjectNameError(opts.project_name));
         }
 
         Ok(opts)

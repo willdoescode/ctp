@@ -11,9 +11,6 @@ pub enum TomlError {
 
     #[error("The value of \"{0}\" is an invalid type, expected String")]
     InvalidType(String),
-
-    #[error("Parse error")]
-    ParseError,
 }
 
 fn base_toml_checks(toml_value: &toml::Value) -> Result<(), TomlError> {
