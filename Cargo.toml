@@ -5,6 +5,7 @@ edition = "2021"
 description = "Create The Project"
 license = "MIT"
 authors = ["William Lane <williamlane923@gmail.com>"]
+repository = "https://github.com/willdoescode/ctp"
 
 [dependencies]
 anyhow = "1.0.44"
