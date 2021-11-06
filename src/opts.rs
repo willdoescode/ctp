@@ -9,7 +9,7 @@ pub const DEFAULT_PROJECT_LOCATION: &str = "_";
 
 #[derive(Error, Debug)]
 pub enum OptError {
-    #[error("No config file found. Please create one at $HOME/.ctp or pass in a config file location with --config.")]
+    #[error("No config file found. Please create one at $HOME/.ctp.toml or pass in a config file location with --config.")]
     NoConfigFile,
 }
 

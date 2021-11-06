@@ -1,12 +1,17 @@
 [templates]
 c = "/Users/willlane/dev/ctp/proj-example/"
-cpp = "/Users/willlane/dev/bubbles" # https://github.com/willdoescode/bubbles
+cpp = "/Users/willlane/ctp-templates/bubbles" # https://github.com/willdoescode/ctp
+rust = "/Users/willlane/ctp-templates/rust"
+haskell = "/Users/willlane/ctp-templates/haskell"
 
-# Commands to run before project is generated
 [commands-before]
-c = ["echo {{__OUT__}}"]
+c = ["echo \"Creating c project in {{__OUT__}}\""]
+cpp = ["echo \"Creating cpp project in {{__OUT__}}\""]
+rust = ["echo \"Creating rust project in {{__OUT__}}\""]
+haskell = ["echo \"Creating haskell project in {{__OUT__}}\""]
 
-# Commands to run in directory after project is generated
 [commands-after]
 c = ["gcc main.c -o {{__NAME__}}", "./{{__NAME__}}"]
 cpp = ["rm .git"]
+rust = ["cargo init"]
+haskell = ["ghc Main.hs", "./Main"]

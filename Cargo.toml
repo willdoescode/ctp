@@ -1,6 +1,6 @@
 [package]
 name = "ctp"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2021"
 description = "Create The Project"
 license = "MIT"
