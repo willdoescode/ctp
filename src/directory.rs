@@ -13,6 +13,17 @@ pub fn copy_dir_all(
     proj_name: &str,
     proj_out: &str,
 ) -> anyhow::Result<()> {
+    if src
+        .as_ref()
+        .file_name()
+        .unwrap()
+        .to_str()
+        .unwrap()
+        .starts_with(".git")
+    {
+        return Ok(());
+    }
+
     fs::create_dir_all(&dst)?;
     for entry in fs::read_dir(src)? {
         let entry = entry?;
