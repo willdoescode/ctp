@@ -11,11 +11,18 @@ pub enum TomlError {
 
     #[error("The value of \"{0}\" is an invalid type, expected String")]
     InvalidType(String),
+
+    #[error("Could not convert toml types")]
+    ConversionError,
 }
 
 fn base_toml_checks(toml_value: &toml::Value) -> Result<(), TomlError> {
-    let toml_table_unwraped = toml_value.as_table().unwrap();
-    if !toml_table_unwraped.contains_key("templates") {
+    let toml_table_unwrapped = match toml_value.as_table() {
+        Some(t) => t,
+        None => return Err(TomlError::ConversionError),
+    };
+
+    if !toml_table_unwrapped.contains_key("templates") {
         return Err(TomlError::SectionNotFound("templates".into()));
     }
 
@@ -26,12 +33,10 @@ fn get_table<'a>(
     toml_value: &toml::Value,
     name: &str,
 ) -> Result<toml::map::Map<String, toml::Value>, TomlError> {
-    let templates = match toml_value[name].as_table() {
-        Some(table) => table,
+    match toml_value[name].as_table() {
+        Some(table) => Ok(table.clone()),
         None => return Err(TomlError::SectionNotFound(name.into())),
-    };
-
-    Ok(templates.to_owned())
+    }
 }
 
 fn extract_language_value<'a, T>(
@@ -72,11 +77,12 @@ pub fn get_commands(
     variant: CommandVariants,
 ) -> Result<Option<Vec<String>>, TomlError> {
     base_toml_checks(toml_value)?;
-    if !toml_value
-        .as_table()
-        .unwrap()
-        .contains_key(&variant.to_string())
-    {
+    let toml_value_table = match toml_value.as_table() {
+        Some(t) => t,
+        None => return Err(TomlError::ConversionError),
+    };
+
+    if !toml_value_table.contains_key(&variant.to_string()) {
         return Ok(None);
     }
 

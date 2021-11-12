@@ -5,7 +5,7 @@ use clap::Parser;
 use thiserror::Error;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
-pub const DEFAULT_PROJECT_LOCATION: &str = "_";
+pub const DEFAULT_STR: &str = "_";
 
 #[derive(Error, Debug)]
 pub enum OptError {
@@ -16,7 +16,7 @@ pub enum OptError {
 #[derive(Parser)]
 #[clap(version = VERSION, author = "William Lane <williamlane923@gmail.com>")]
 pub struct Opts {
-    #[clap(short, long, default_value = "_default_")]
+    #[clap(short, long, default_value = DEFAULT_STR)]
     /// Optional custom config file location.
     pub config: PathBuf,
 
@@ -25,7 +25,7 @@ pub struct Opts {
     /// Project name.
     pub project_name: String,
 
-    #[clap(short, long, default_value = DEFAULT_PROJECT_LOCATION)]
+    #[clap(short, long, default_value = DEFAULT_STR)]
     /// Optional custom output directory location.
     pub output: PathBuf,
 }
@@ -35,11 +35,11 @@ impl Opts {
     pub fn opts() -> Result<Self, OptError> {
         let mut opts: Opts = Opts::parse();
 
-        if opts.config.as_path().to_str().unwrap() == "_default_" {
+        if opts.config.as_path().to_str().unwrap() == DEFAULT_STR {
             opts.config = PathBuf::from(std::env::var("HOME").unwrap()).join(".ctp.toml");
         }
 
-        if opts.output.as_path().to_str().unwrap() == DEFAULT_PROJECT_LOCATION {
+        if opts.output.as_path().to_str().unwrap() == DEFAULT_STR {
             opts.output = ["./", &opts.project_name].iter().collect();
         }
 

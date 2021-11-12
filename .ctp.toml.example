@@ -1,8 +1,11 @@
 [templates]
 c = "/Users/willlane/dev/ctp/proj-example/"
-cpp = "/Users/willlane/ctp-templates/bubbles" # https://github.com/willdoescode/ctp
+cpp = "/Users/willlane/ctp-templates/bubbles"     # https://github.com/willdoescode/ctp
 rust = "/Users/willlane/ctp-templates/rust"
 haskell = "/Users/willlane/ctp-templates/haskell"
+
+# TODO: Add git clone support
+python = "https://github.com/rochacbruno/python-project-template"
 
 [commands-before]
 c = ["echo \"Creating c project in {{__OUT__}}\""]
