@@ -9,6 +9,23 @@ pub enum ExecError {
     EmptyCommand,
 }
 
+pub fn execute_commands(
+    opts: &crate::opts::Opts,
+    toml_config: &toml::Value,
+    output_path: &str,
+    command_variant: crate::shape::CommandVariants,
+) -> Result<()> {
+    if let Some(commands) =
+        crate::shape::get_commands(toml_config, &opts.language, command_variant)?
+    {
+        for command in commands {
+            exec(&command, &opts.project_name, &output_path)?
+        }
+    }
+
+    Ok(())
+}
+
 pub fn exec(s: &str, proj_name: &str, proj_output: &str) -> Result<(), anyhow::Error> {
     let replaced = s
         .replace(crate::REPLACEABLE_NAME, proj_name)
