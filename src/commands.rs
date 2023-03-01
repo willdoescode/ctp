@@ -41,9 +41,21 @@ pub fn exec(s: &str, proj_name: &str, proj_output: &str) -> Result<(), anyhow::E
 }
 
 fn execute_command_with_output(command: &str, args: &[&str]) -> Result<(), anyhow::Error> {
-    println!("[CMD]    {} [{}]", command, &args.to_vec().join(", "));
+    println!("[CMD]    {} {}", command, &args.to_vec().join(" "));
     let cmd = Command::new(command).args(args).output()?;
-    println!("[STDOUT] {}", std::str::from_utf8(cmd.stdout.as_slice())?);
+
+    if let Some(output) = cmd.stdout.get(..) {
+        let output = String::from_utf8_lossy(output);
+        if !output.is_empty() {
+            println!("[STDOUT] {}", output);
+        }
+    }
+
+    if let Some(code) = cmd.status.code() {
+        if code != 0 {
+            return Err(anyhow!("Command exited status code: {}", code));
+        }
+    }
 
     Ok(())
 }

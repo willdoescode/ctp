@@ -7,6 +7,22 @@ fn replace_name_and_out(s: String, proj_name: &str, proj_out: &str) -> String {
         .replace(crate::REPLACEABLE_OUTPUT, proj_out)
 }
 
+fn dir_exists_check<P>(path: P) -> Result<(), anyhow::Error>
+where
+    P: AsRef<Path>,
+{
+    let path = path.as_ref();
+
+    if path.is_dir() && path.exists() {
+        return Err(anyhow::anyhow!(
+            "Directory already exists: {}",
+            path.display()
+        ));
+    }
+
+    Ok(())
+}
+
 pub fn copy_dir_all(
     src: impl AsRef<Path>,
     dst: impl AsRef<Path>,
@@ -23,6 +39,8 @@ pub fn copy_dir_all(
     {
         return Ok(());
     }
+
+    dir_exists_check(&src)?;
 
     fs::create_dir_all(&dst)?;
     for entry in fs::read_dir(src)? {
