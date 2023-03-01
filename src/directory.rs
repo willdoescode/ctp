@@ -23,6 +23,30 @@ where
     Ok(())
 }
 
+fn copy_file(
+    dst: &impl AsRef<Path>,
+    entry: fs::DirEntry,
+    proj_name: &str,
+    proj_out: &str,
+) -> Result<(), anyhow::Error> {
+    let output = dst.as_ref().join(entry.file_name());
+    let mut contents = String::new();
+
+    fs::File::open(&entry.path())?.read_to_string(&mut contents)?;
+    let contents = replace_name_and_out(contents, proj_name, proj_out);
+
+    fs::copy(entry.path(), &output)?;
+
+    let mut f = OpenOptions::new()
+        .read(false)
+        .write(true)
+        .truncate(true)
+        .open(output)?;
+    f.seek(SeekFrom::Start(0))?;
+    f.write_all(contents.as_bytes())?;
+    Ok(())
+}
+
 pub fn copy_dir_all(
     src: impl AsRef<Path>,
     dst: impl AsRef<Path>,
@@ -40,7 +64,7 @@ pub fn copy_dir_all(
         return Ok(());
     }
 
-    dir_exists_check(&src)?;
+    dir_exists_check(&dst)?;
 
     fs::create_dir_all(&dst)?;
     for entry in fs::read_dir(src)? {
@@ -54,19 +78,7 @@ pub fn copy_dir_all(
                 proj_out,
             )?;
         } else {
-            let output = dst.as_ref().join(entry.file_name());
-            let mut contents = String::new();
-            fs::File::open(&entry.path())?.read_to_string(&mut contents)?;
-            let contents = replace_name_and_out(contents, proj_name, proj_out);
-            fs::copy(entry.path(), &output)?;
-
-            let mut f = OpenOptions::new()
-                .read(false)
-                .write(true)
-                .truncate(true)
-                .open(output)?;
-            f.seek(SeekFrom::Start(0))?;
-            f.write_all(contents.as_bytes())?;
+            copy_file(&dst, entry, proj_name, proj_out)?;
         }
     }
 
