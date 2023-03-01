@@ -47,38 +47,44 @@ fn copy_file(
     Ok(())
 }
 
+fn check_git(src: &impl AsRef<Path>) -> bool {
+    src.as_ref()
+        .file_name()
+        .unwrap()
+        .to_str()
+        .unwrap()
+        .starts_with(".git")
+}
+
 pub fn copy_dir_all(
     src: impl AsRef<Path>,
     dst: impl AsRef<Path>,
     proj_name: &str,
     proj_out: &str,
 ) -> anyhow::Result<()> {
-    if src
-        .as_ref()
-        .file_name()
-        .unwrap()
-        .to_str()
-        .unwrap()
-        .starts_with(".git")
-    {
+    if check_git(&src) {
         return Ok(());
-    }
+    };
 
     dir_exists_check(&dst)?;
-
     fs::create_dir_all(&dst)?;
+
     for entry in fs::read_dir(src)? {
         let entry = entry?;
         let ft = entry.file_type()?;
-        if ft.is_dir() {
-            copy_dir_all(
-                entry.path(),
-                dst.as_ref().join(entry.file_name()),
-                proj_name,
-                proj_out,
-            )?;
-        } else {
-            copy_file(&dst, entry, proj_name, proj_out)?;
+
+        match ft.is_dir() {
+            true => {
+                copy_dir_all(
+                    entry.path(),
+                    dst.as_ref().join(entry.file_name()),
+                    proj_name,
+                    proj_out,
+                )?;
+            }
+            _ => {
+                copy_file(&dst, entry, proj_name, proj_out)?;
+            }
         }
     }
 
