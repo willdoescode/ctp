@@ -9,6 +9,6 @@ repository = "https://github.com/willdoescode/ctp"
 
 [dependencies]
 anyhow = "1.0.44"
-clap = "3.0.0-beta.5"
+clap = { version = "4.3.19", features = ["derive"] }
 thiserror = "1.0.30"
 toml = "0.5.8"

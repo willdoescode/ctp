@@ -4,7 +4,7 @@
 
 ![example](./assets/e.png)
 
-[Config Example](./.ctp.toml.example)
+[Config Example](./.ctp.example.toml)
 
 ### Install
 

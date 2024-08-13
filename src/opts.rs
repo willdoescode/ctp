@@ -13,18 +13,18 @@ pub enum OptError {
 #[derive(Parser)]
 #[clap(version = crate::VERSION, author = "William Lane <williamlane923@gmail.com>")]
 pub struct Opts {
-    #[clap(short, long, default_value = "_default_")]
+    #[clap(short, long)]
     /// Optional custom config file location.
-    pub config: PathBuf,
+    pub config: Option<PathBuf>,
 
     /// Project language name.
     pub language: String,
     /// Project name.
     pub project_name: String,
 
-    #[clap(short, long, default_value = crate::DEFAULT_PROJECT_LOCATION)]
+    #[clap(short, long)]
     /// Optional custom output directory location.
-    pub output: PathBuf,
+    pub output: Option<PathBuf>,
 }
 
 impl Opts {
@@ -32,16 +32,17 @@ impl Opts {
     pub fn opts() -> Result<Self, OptError> {
         let mut opts: Opts = Opts::parse();
 
-        if opts.config.as_path().to_str().unwrap() == "_default_" {
-            opts.config = PathBuf::from(std::env::var("HOME").unwrap()).join(".ctp.toml");
-        }
+        opts.config = match &opts.config {
+            Some(path) => Some(path.clone()),
+            None => Some(PathBuf::from(std::env::var("HOME").unwrap()).join(".ctp.toml")),
+        };
 
-        if opts.output.as_path().to_str().unwrap() == crate::DEFAULT_PROJECT_LOCATION {
-            opts.output = ["./", &opts.project_name].iter().collect();
-        }
-
-        if !opts.config.exists() {
+        if opts.config.as_ref().map(|p| !p.exists()).unwrap_or(true) {
             return Err(OptError::NoConfigFile);
+        }
+
+        if opts.output.is_none() {
+            opts.output = Some(["./", &opts.project_name].iter().collect());
         }
 
         Ok(opts)

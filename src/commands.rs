@@ -1,6 +1,6 @@
 use std::process::Command;
 
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, Context, Result};
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -30,31 +30,32 @@ pub fn exec(s: &str, proj_name: &str, proj_output: &str) -> Result<(), anyhow::E
     let replaced = s
         .replace(crate::REPLACEABLE_NAME, proj_name)
         .replace(crate::REPLACEABLE_OUTPUT, proj_output);
-    let split = replaced.split_ascii_whitespace().collect::<Vec<&str>>();
 
-    match split.as_slice() {
-        [head, tail @ ..] => execute_command_with_output(head, tail)?,
-        [] => return Err(anyhow!(ExecError::EmptyCommand.to_string())),
-    }
+    let mut parts = replaced.split_ascii_whitespace();
+    let command = parts.next().ok_or_else(|| ExecError::EmptyCommand)?;
+    let args: Vec<&str> = parts.collect();
 
-    Ok(())
+    execute_command_with_output(command, &args)
 }
 
 fn execute_command_with_output(command: &str, args: &[&str]) -> Result<(), anyhow::Error> {
-    println!("[CMD]    {} {}", command, &args.to_vec().join(" "));
-    let cmd = Command::new(command).args(args).output()?;
+    println!("[CMD]    {} {}", command, args.join(" "));
 
-    if let Some(output) = cmd.stdout.get(..) {
-        let output = String::from_utf8_lossy(output);
-        if !output.is_empty() {
-            println!("[STDOUT] {}", output);
-        }
+    let output = Command::new(command)
+        .args(args)
+        .output()
+        .with_context(|| format!("Failed to execute command: {} {}", command, args.join(" ")))?;
+
+    if !output.stdout.is_empty() {
+        println!("[STDOUT] {}", String::from_utf8_lossy(&output.stdout));
     }
 
-    if let Some(code) = cmd.status.code() {
-        if code != 0 {
-            return Err(anyhow!("Command exited status code: {}", code));
-        }
+    if !output.stderr.is_empty() {
+        println!("[STDERR] {}", String::from_utf8_lossy(&output.stderr));
+    }
+
+    if !output.status.success() {
+        return Err(anyhow!("Command failed: {}", output.status));
     }
 
     Ok(())
